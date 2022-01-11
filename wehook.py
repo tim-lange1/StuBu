@@ -1,4 +1,7 @@
 from flask import Flask, request
+import json
+import functions.math as m
+import functions.login as l
 app = Flask(__name__)
 
 @app.route('/') # this is the home page route
@@ -8,28 +11,18 @@ def hello_world(): # this is the home page function that generates the page code
 @app.route('/webhook', methods=['POST'])
 def webhook():
     req = request.get_json(silent=True, force=True)
+    query_result = req.get('queryResult')
     fulfillmentText = ''
     sum = 0
-    query_result = req.get('queryResult')
-    if query_result.get('action') == 'add.numbers':
-        num1 = int(query_result.get('parameters').get('number'))
-        num2 = int(query_result.get('parameters').get('number1'))
-        sum = str(num1 + num2)
-        print('here num1 = {0}'.format(num1))
-        print('here num2 = {0}'.format(num2))
-        fulfillmentText = 'The sum of the two numbers is '+sum
-    elif query_result.get('action') == 'multiply.numbers':
-        num1 = int(query_result.get('parameters').get('number'))
-        num2 = int(query_result.get('parameters').get('number1'))
-        product = str(num1 * num2)
-        print('here num1 = {0}'.format(num1))
-        print('here num2 = {0}'.format(num2))
-        fulfillmentText = 'The product of the two numbers is '+product
-    return {
-        "fulfillmentText": fulfillmentText,
-        "source": "webhookdata"
-    }
+    if query_result.get('action') == 'multiply.numbers':
+        return {
+            "fulfillmentText": m.multiply(query_result),
+            "source": "webhookdata"
+        }
 
+    if query_result.get('action') == 'input.welcome':
+        set = str(l.question())
+        return {set}
 
 if __name__ == '__main__':
     app.run(port=5000) # This line is required to run Flask on repl.it
